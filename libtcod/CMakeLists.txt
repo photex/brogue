@@ -10,9 +10,13 @@ target_include_directories(tcod
 
 if (MSVC)
   target_compile_definitions(tcod
-    PUBLIC -D_CRT_SECURE_NO_WARNINGS -DLIBTCOD_EXPORTS
+    PUBLIC -D_CRT_SECURE_NO_WARNINGS
     )
 endif()
+
+target_compile_definitions(tcod
+    PUBLIC -DLIBTCOD_EXPORTS
+    )
 
 if (NOT MSVC)
   set_target_properties(tcod

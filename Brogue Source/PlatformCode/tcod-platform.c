@@ -4,7 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <libtcod.h>
 #include "platform.h"
 

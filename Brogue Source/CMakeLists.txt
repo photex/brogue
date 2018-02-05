@@ -37,11 +37,10 @@ if (EMSCRIPTEN)
     LINK_FLAGS "-s WASM=1"
     )
 else()
-  target_compile_definitions(brogue PUBLIC -DTCOD_WINDOWS)
   set_target_properties(brogue
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    C_STANDARD C99
+    C_STANDARD 99
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
     )
