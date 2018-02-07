@@ -35,9 +35,13 @@ static void loadFont(int detectSize)
 		int fontWidths[13] = {112, 128, 144, 160, 176, 192, 208, 224, 240, 256, 272, 288, 304}; // widths of the font graphics (divide by 16 to get individual character width)
 		int fontHeights[13] = {176, 208, 240, 272, 304, 336, 368, 400, 432, 464, 496, 528, 528}; // heights of the font graphics (divide by 16 to get individual character height)
 
-		const SDL_VideoInfo* vInfo = SDL_GetVideoInfo();
-		int screenWidth = desktop_width = vInfo->current_w;
-		int screenHeight = desktop_height = vInfo->current_h;
+    SDL_DisplayMode displayMode;
+    SDL_GetDisplayMode(0, 0, &displayMode);
+    int screenWidth = displayMode.w;
+    int screenHeight = displayMode.h;
+		// const SDL_VideoInfo* vInfo = SDL_GetVideoInfo();
+		// int screenWidth = desktop_width = vInfo->current_w;
+		// int screenHeight = desktop_height = vInfo->current_h;
 
 		// adjust for title bars and whatever -- very approximate, but better than the alternative
 		screenWidth -= 6;
@@ -53,7 +57,7 @@ static void loadFont(int detectSize)
 
 	}
 
-	sprintf(font, "fonts/font-%i.png", brogueFontSize);
+	sprintf(font, "/fonts/font-%i.png", brogueFontSize);
 
 	TCOD_console_set_custom_font(font, (TCOD_FONT_TYPE_GREYSCALE | TCOD_FONT_LAYOUT_ASCII_INROW), 0, 0);
 	TCOD_console_init_root(COLS, ROWS, "Brogue", false, renderer);
@@ -63,7 +67,7 @@ static void loadFont(int detectSize)
 	// TCOD_console_set_keyboard_repeat(175, 30);
 	TCOD_mouse_show_cursor(1);
 
-	SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
+	//SDL_WM_SetIcon(SDL_LoadBMP("icon.bmp"), NULL);
 }
 
 static void gameLoop()
@@ -226,7 +230,7 @@ static void rewriteKey(TCOD_key_t *key, boolean text) {
 }
 
 static void getModifiers(rogueEvent *returnEvent) {
-	Uint8 *keystate = SDL_GetKeyboardState(NULL);
+	const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 	returnEvent->controlKey = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
 	returnEvent->shiftKey = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
 }
@@ -427,15 +431,15 @@ static void tcod_nextKeyOrMouseEvent(rogueEvent *returnEvent, boolean textInput,
 			return;
 		}
 
-		if (!(serverMode || (SDL_GetAppState() & SDL_APPACTIVE))) {
-			TCOD_sys_sleep_milli(100);
-		} else {
+		// if (!(serverMode || (SDL_GetAppState() & SDL_APPACTIVE))) {
+		// 	TCOD_sys_sleep_milli(100);
+		// } else {
 			if (colorsDance) {
 				shuffleTerrainColors(3, true);
 				commitDraws();
 			}
 			TCOD_console_flush();
-		}
+    //}
 
 		#ifdef USE_NEW_TCOD_API
 		TCOD_sys_check_for_event(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &key, &mouse);
@@ -450,13 +454,13 @@ static void tcod_nextKeyOrMouseEvent(rogueEvent *returnEvent, boolean textInput,
 
 		mouse = TCOD_mouse_get_status();
 
-		if (serverMode || (SDL_GetAppState() & SDL_APPACTIVE)) {
+		//if (serverMode || (SDL_GetAppState() & SDL_APPACTIVE)) {
 			x = mouse.cx;
 			y = mouse.cy;
-		} else {
-			x = 0;
-			y = 0;
-		}
+		// } else {
+		// 	x = 0;
+		// 	y = 0;
+		//}
 
 		if (
 			mouse.lbutton_pressed || mouse.rbutton_pressed

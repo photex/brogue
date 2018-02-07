@@ -1,4 +1,6 @@
 
+set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
 add_executable(brogue
   BrogueCode/Architect.c
   BrogueCode/Combat.c
@@ -30,11 +32,11 @@ if (EMSCRIPTEN)
   set_target_properties(brogue
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    C_STANDARD 99
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED ON
-    CFLAGS   -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s USE_PNG=1 -s OFFSCREENCANVAS_SUPPORT=1
-    CXXFLAGS -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s USE_PNG=1 -s OFFSCREENCANVAS_SUPPORT=1
-    LINK_FLAGS "-s WASM=1"
+    CFLAGS "-s USE_WEBGL2=1" "-s FULL_ES3=1" "-s OFFSCREENCANVAS_SUPPORT=1" "-s USE_ZLIB=1" "-s USE_PNG=1"
+    LINK_FLAGS "-s WASM=1" "--emrun" "--preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts"
     )
 else()
   set_target_properties(brogue
