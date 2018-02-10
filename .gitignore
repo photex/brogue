@@ -1,3 +1,6 @@
 BrogueHighScores.txt
 *.broguerec
 .build/
+.idea/
+.vscode/0.*.bat
+.vscode/.cmaketools.json
