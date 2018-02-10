@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
+		"cmake.configureArgs": [
+			"-DEMSCRIPTEN=ON",
+			"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+		],
+		"files.associations": {
+			"rogue.h": "c"
+		},
+	}
+}

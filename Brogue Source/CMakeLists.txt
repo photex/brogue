@@ -25,18 +25,22 @@ target_include_directories(brogue
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/BrogueCode
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/PlatformCode
   )
-target_link_libraries(brogue SDL2main tcod)
+target_link_libraries(brogue tcod)
 
 if (EMSCRIPTEN)
-  target_compile_definitions(brogue PUBLIC -DTCOD_EMSCRIPTEN -D_POSIX_SOURCE -D_GNU_SOURCE)
+  set(EMSETTINGS
+    -s USE_WEBGL2=1 -s FULL_ES3=1
+    -s OFFSCREENCANVAS_SUPPORT=1
+    -s USE_SDL=2
+    -s USE_ZLIB=1
+    -s USE_PNG=1
+    -s WASM=1
+  )
   set_target_properties(brogue
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     C_STANDARD 99
-    CXX_STANDARD 14
-    CXX_STANDARD_REQUIRED ON
-    CFLAGS "-s USE_WEBGL2=1" "-s FULL_ES3=1" "-s OFFSCREENCANVAS_SUPPORT=1" "-s USE_ZLIB=1" "-s USE_PNG=1"
-    LINK_FLAGS "-s WASM=1" "--emrun" "--preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts"
+    CFLAGS "${EMSETTINGS}"
+    LINK_FLAGS "-s WASM=1 --preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts"
     )
 else()
   set_target_properties(brogue

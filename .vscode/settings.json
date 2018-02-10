@@ -1,0 +1,7 @@
+{
+  "cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
+  "cmake.configureArgs": [
+    "-DEMSCRIPTEN=ON",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+  ],
+}
