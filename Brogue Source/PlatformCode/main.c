@@ -2,7 +2,7 @@
 
 #ifdef BROGUE_TCOD
 #include "libtcod.h"
-static TCOD_renderer_t renderer = TCOD_RENDERER_SDL; // the sdl renderer is more reliable than the opengl renderer
+TCOD_renderer_t renderer = TCOD_RENDERER_SDL; // the sdl renderer is more reliable than the opengl renderer
 short brogueFontSize = -1;
 #endif
 

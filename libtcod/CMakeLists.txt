@@ -35,7 +35,7 @@ set(TCOD_SOURCES
     src/bresenham_c.c
 )
 
-add_library(tcod STATIC ${TCOD_SOURCES} ${TCOD_HEADERS})
+add_library(tcod OBJECT ${TCOD_SOURCES} ${TCOD_HEADERS})
 target_include_directories(tcod
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/zlib
@@ -62,7 +62,7 @@ if (EMSCRIPTEN)
     set(EMSETTINGS
         -s USE_WEBGL2=1 -s FULL_ES3=1
         -s OFFSCREENCANVAS_SUPPORT=1
-        -s USE_SDL=2
+        #-s USE_SDL=2
         -s USE_ZLIB=1
         -s USE_PNG=1
         -s WASM=1

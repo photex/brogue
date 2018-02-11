@@ -1,4 +1,5 @@
 {
+  "editor.tabSize": 2,
   "cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
   "cmake.configureArgs": [
     "-DEMSCRIPTEN=ON",

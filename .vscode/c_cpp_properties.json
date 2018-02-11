@@ -1,43 +1,51 @@
 {
-  "configurations": [
-    {
-      "name": "Emscripten",
-      "includePath": [
-        "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include/*",
-        "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/atlmfc/include/*",
-        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um",
-        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/ucrt",
-        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/shared",
-        "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt",
-        "${workspaceRoot}",
-        "${workspaceRoot}/SDL2-2.0.7/include",
-        "${workspaceRoot}/libtcod/include",
-        "${workspaceRoot}/Brogue Source/BrogueCode",
-        "${workspaceRoot}/Brogue Source/BrogueSource"
-      ],
-      "defines": [
-        "_DEBUG",
-        "UNICODE",
-        "BROGUE_TCOD",
-        "BROGUE_EMSCRIPTEN"
-      ],
-      "intelliSenseMode": "msvc-x64",
-      "browse": {
-        "path": [
-          "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include/*",
-          "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/atlmfc/include/*",
-          "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um",
-          "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/ucrt",
-          "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/shared",
-          "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt",
-          "${workspaceRoot}",
-          "${workspaceRoot}/Brogue Source/BrogueCode",
-          "${workspaceRoot}/Brogue Source/BrogueSource"
-        ],
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
-      }
-    }
-  ],
-  "version": 3
+    "configurations": [
+        {
+            "name": "Emscripten",
+            "includePath": [
+                "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include/*",
+                "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/atlmfc/include/*",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/ucrt",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/shared",
+                "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt",
+                "${workspaceRoot}",
+                "${workspaceRoot}/SDL2-2.0.7/include",
+                "${workspaceRoot}/libtcod/include",
+                "${workspaceRoot}/Brogue Source/BrogueCode",
+                "${workspaceRoot}/Brogue Source/PlatformCode",
+                "${env:EMSCRIPTEN}/system/include",
+                "${env:EMSCRIPTEN}/system/include/libc",
+                "${env:EMSCRIPTEN}/system/lib/libc/musl/arch/emscripten"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "BROGUE_TCOD",
+                "BROGUE_EMSCRIPTEN",
+                "TCOD_EMSCRIPTEN",
+                "NO_OPENGL"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include/*",
+                    "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/atlmfc/include/*",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/um",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/ucrt",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/shared",
+                    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.16299.0/winrt",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/Brogue Source/BrogueCode",
+                    "${workspaceRoot}/Brogue Source/PlatformCode",
+                    "${env:EMSCRIPTEN}/system/include",
+                    "${env:EMSCRIPTEN}/system/include/libc",
+                    "${env:EMSCRIPTEN}/system/lib/libc/musl/arch/emscripten"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
 }

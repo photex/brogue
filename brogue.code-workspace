@@ -5,6 +5,8 @@
 		}
 	],
 	"settings": {
+		"editor.tabSize": 2,
+		"editor.detectIndentation": false,
 		"cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
 		"cmake.configureArgs": [
 			"-DEMSCRIPTEN=ON",
