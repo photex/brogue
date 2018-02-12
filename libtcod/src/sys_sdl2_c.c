@@ -112,8 +112,8 @@ static void actual_rendering(void)
 	{
 		TCOD_ctx.sdl_cbk((void *)scale_screen);
 	}
-	texture = SDL_CreateTextureFromSurface(renderer, scale_screen);
-	SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
+	texture = SDL_CreateTextureFromSurface(sdl_renderer, scale_screen);
+	SDL_RenderCopy(sdl_renderer, texture, &srcRect, &dstRect);
 	SDL_DestroyTexture(texture);
 }
 
@@ -150,7 +150,7 @@ static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, TCOD_console_data_t *c
 		{
 			int bpp;
 			uint32_t rmask, gmask, bmask, amask;
-			if (SDL_PixelFormatEnumToMasks(SDL_GetWindowPixelFormat(window), &bpp, &rmask, &gmask, &bmask, &amask) == SDL_FALSE)
+			if (SDL_PixelFormatEnumToMasks(SDL_GetWindowPixelFormat(sdl_window), &bpp, &rmask, &gmask, &bmask, &amask) == SDL_FALSE)
 			{
 				TCOD_fatal("SDL : failed to create scaling surface : indeterminate window pixel format");
 				return;
@@ -228,9 +228,9 @@ static void render(TCOD_SDL_driver_t *sdl, void *vbitmap, TCOD_console_data_t *c
 			scale_data.dst_offset_y = (scale_data.surface_height - scale_data.dst_display_height) / 2;
 		}
 
-		SDL_RenderClear(renderer);
+		SDL_RenderClear(sdl_renderer);
 		actual_rendering();
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(sdl_renderer);
 	}
 #ifndef NO_OPENGL
 	else
@@ -315,8 +315,8 @@ static void create_window(int w, int h, bool fullscreen)
 #if defined(TCOD_ANDROID) && defined(FUTURE_SUPPORT)
 			winflags |= SDL_WINDOW_RESIZABLE;
 #endif
-			window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, TCOD_ctx.actual_fullscreen_width, TCOD_ctx.actual_fullscreen_height, winflags);
-			if (window && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders())
+			sdl_window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, TCOD_ctx.actual_fullscreen_width, TCOD_ctx.actual_fullscreen_height, winflags);
+			if (sdl_window && TCOD_opengl_init_state(w, h, charmap) && TCOD_opengl_init_shaders())
 			{
 				TCOD_LOG(("Using %s renderer...\n", TCOD_ctx.renderer == TCOD_RENDERER_GLSL ? "GLSL" : "OPENGL"));
 			}
@@ -333,12 +333,12 @@ static void create_window(int w, int h, bool fullscreen)
 #if defined(TCOD_ANDROID) && defined(FUTURE_SUPPORT)
 			winflags |= SDL_WINDOW_RESIZABLE;
 #endif
-			window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, TCOD_ctx.actual_fullscreen_width, TCOD_ctx.actual_fullscreen_height, winflags);
-			if (window == NULL)
+			sdl_window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, TCOD_ctx.actual_fullscreen_width, TCOD_ctx.actual_fullscreen_height, winflags);
+			if (sdl_window == NULL)
 				TCOD_fatal_nopar("SDL : cannot set fullscreen video mode");
 		}
 		SDL_ShowCursor(0);
-		SDL_GetWindowSize(window, &TCOD_ctx.actual_fullscreen_width, &TCOD_ctx.actual_fullscreen_height);
+		SDL_GetWindowSize(sdl_window, &TCOD_ctx.actual_fullscreen_width, &TCOD_ctx.actual_fullscreen_height);
 		TCOD_sys_init_screen_offset();
 	}
 	else
@@ -362,18 +362,18 @@ static void create_window(int w, int h, bool fullscreen)
 #endif
 		if (TCOD_ctx.renderer == TCOD_RENDERER_SDL)
 		{
-			window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w * TCOD_ctx.font_width, h * TCOD_ctx.font_height, winflags);
+			sdl_window = SDL_CreateWindow(TCOD_ctx.window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w * TCOD_ctx.font_width, h * TCOD_ctx.font_height, winflags);
 			TCOD_LOG(("Using SDL renderer...\n"));
 		}
-		if (window == NULL)
+		if (sdl_window == NULL)
 			TCOD_fatal_nopar("SDL : cannot create window");
 	}
 	if (TCOD_ctx.renderer == TCOD_RENDERER_SDL)
 	{
-		renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-		if (renderer == NULL)
+		sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
+		if (sdl_renderer == NULL)
 			TCOD_fatal_nopar("SDL : cannot create renderer");
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_SetRenderDrawColor(sdl_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	}
 }
 
@@ -390,15 +390,15 @@ static void destroy_window(void)
 		SDL_FreeSurface(scale_screen);
 		scale_screen = NULL;
 	}
-	if (renderer)
+	if (sdl_renderer)
 	{
-		SDL_DestroyRenderer(renderer);
-		renderer = NULL;
+		SDL_DestroyRenderer(sdl_renderer);
+		sdl_renderer = NULL;
 	}
-	if (window)
+	if (sdl_window)
 	{
-		SDL_DestroyWindow(window);
-		window = NULL;
+		SDL_DestroyWindow(sdl_window);
+		sdl_window = NULL;
 	}
 }
 
@@ -408,14 +408,14 @@ static void set_fullscreen(bool fullscreen)
 	if (fullscreen)
 	{
 		find_resolution();
-		SDL_SetWindowFullscreen(window, fullscreen);
+		SDL_SetWindowFullscreen(sdl_window, fullscreen);
 		SDL_ShowCursor(mouseOn ? 1 : 0);
-		SDL_GetWindowSize(window, &TCOD_ctx.actual_fullscreen_width, &TCOD_ctx.actual_fullscreen_height);
+		SDL_GetWindowSize(sdl_window, &TCOD_ctx.actual_fullscreen_width, &TCOD_ctx.actual_fullscreen_height);
 		TCOD_sys_init_screen_offset();
 	}
 	else
 	{
-		SDL_SetWindowFullscreen(window, fullscreen);
+		SDL_SetWindowFullscreen(sdl_window, fullscreen);
 		SDL_ShowCursor(mouseOn ? 1 : 0);
 		TCOD_ctx.fullscreen_offsetx = 0;
 		TCOD_ctx.fullscreen_offsety = 0;
@@ -426,7 +426,7 @@ static void set_fullscreen(bool fullscreen)
 
 static void set_window_title(const char *title)
 {
-	SDL_SetWindowTitle(window, title);
+	SDL_SetWindowTitle(sdl_window, title);
 }
 
 static void save_screenshot(const char *filename)
@@ -493,9 +493,9 @@ static void get_current_resolution(int *w, int *h)
 {
 	int displayidx;
 	SDL_Rect rect = {0, 0, 0, 0};
-	if (window)
+	if (sdl_window)
 	{
-		TCOD_IFNOT(window)
+		TCOD_IFNOT(sdl_window)
 		return;
 #ifndef TCOD_EMSCRIPTEN
 		displayidx = SDL_GetWindowDisplayIndex(window);
@@ -520,19 +520,19 @@ static void get_current_resolution(int *w, int *h)
 
 static void set_mouse_position(int x, int y)
 {
-	SDL_WarpMouseInWindow(window, (uint16_t)x, (uint16_t)y);
+	SDL_WarpMouseInWindow(sdl_window, (uint16_t)x, (uint16_t)y);
 }
 
 static char *get_clipboard_text(void)
 {
-#ifdef TCOD_LINUX
+  #ifdef TCOD_LINUX
 	/*
 		X11 clipboard is inaccessible without an open window.
 		https://bugzilla.libsdl.org/show_bug.cgi?id=3222
 	*/
 	if (!window)
 		return "";
-#endif
+  #endif
 
 	/*
 	We hold onto the last clipboard text pointer SDL gave us.
@@ -550,14 +550,14 @@ static char *get_clipboard_text(void)
 
 static bool set_clipboard_text(const char *text)
 {
-#ifdef TCOD_LINUX
+  #ifdef TCOD_LINUX
 	/*
 	X11 clipboard is inaccessible without an open window.
 	https://bugzilla.libsdl.org/show_bug.cgi?id=3222
 	*/
 	if (!window)
 		return false;
-#endif
+  #endif
 
 	return SDL_SetClipboardText(text) == 0;
 }
@@ -649,4 +649,4 @@ TCOD_SDL_driver_t *SDL_implementation_factory(void)
 	return ret;
 }
 
-#endif /* TCOD_BARE */
+#endif /* not TCOD_BARE */

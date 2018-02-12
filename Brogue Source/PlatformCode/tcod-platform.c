@@ -231,8 +231,8 @@ static void rewriteKey(TCOD_key_t *key, boolean text) {
 
 static void getModifiers(rogueEvent *returnEvent) {
 	const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-	returnEvent->controlKey = keystate[SDLK_LCTRL] || keystate[SDLK_RCTRL];
-	returnEvent->shiftKey = keystate[SDLK_LSHIFT] || keystate[SDLK_RSHIFT];
+	returnEvent->controlKey = keystate[SDL_SCANCODE_LCTRL] || keystate[SDL_SCANCODE_RCTRL];
+	returnEvent->shiftKey = keystate[SDL_SCANCODE_LSHIFT] || keystate[SDL_SCANCODE_RSHIFT];
 }
 
 

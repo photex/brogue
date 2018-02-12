@@ -3,13 +3,14 @@ set(CMAKE_EXECUTABLE_SUFFIX ".html")
 
 file(GLOB TCOD_HEADERS ${CMAKE_SOURCE_DIR}/libtcod/include/*.h)
 set(TCOD_SOURCES
+  ${CMAKE_SOURCE_DIR}/libtcod/src/png/lodepng.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/parser_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/path_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/sys_c.c
   #${CMAKE_SOURCE_DIR}/libtcod/src/sys_opengl_c.c
-  #${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_c.c
-  #${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_img_bmp.c
-  #${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_img_png.c
+  ${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_c.c
+  ${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_img_bmp.c
+  ${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl_img_png.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/sys_sdl2_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/tree_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/txtfield_c.c
@@ -28,7 +29,7 @@ set(TCOD_SOURCES
   ${CMAKE_SOURCE_DIR}/libtcod/src/fov_diamond_raycasting.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/fov_circular_raycasting.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/fov_c.c
-  ${CMAKE_SOURCE_DIR}/libtcod/src/console_rexpaint.c
+  #${CMAKE_SOURCE_DIR}/libtcod/src/console_rexpaint.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/console_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/color_c.c
   ${CMAKE_SOURCE_DIR}/libtcod/src/bsp_c.c
@@ -50,34 +51,28 @@ set(BROGUE_SOURCES
 	BrogueCode/RogueMain.c
 	BrogueCode/Random.c
 	BrogueCode/Recordings.c
-	PlatformCode/main.c
+	PlatformCode/wasm_main.c
 	PlatformCode/platformdependent.c
 	PlatformCode/tcod-platform.c
 )
 
 add_executable(brogue ${TCOD_HEADERS} ${TCOD_SOURCES} ${BROGUE_SOURCES})
 target_compile_definitions(brogue
-  PUBLIC -DBROGUE_TCOD -DLIBTCOD_EXPORTS -DNO_OPENGL -DTCOD_EMSCRIPTEN -D_POSIX_SOURCE -D_GNU_SOURCE
+  PUBLIC -DBROGUE_TCOD -DLIBTCOD_EXPORTS -DNO_OPENGL -DTCOD_EMSCRIPTEN -DTCOD_CONSOLE_SUPPORT -DTCOD_IMAGE_SUPPORT -DTCOD_OSUTIL_SUPPORT
 )
 target_include_directories(brogue
   PRIVATE ${CMAKE_SOURCE_DIR}/libtcod/include
+  PRIVATE ${CMAKE_SOURCE_DIR}/libtcod/src/zlib
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/BrogueCode
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/PlatformCode
 )
 target_link_libraries(brogue SDL2-static SDL2main)
 
 if (EMSCRIPTEN)
-  set(EMSETTINGS
-    -s USE_WEBGL2=1 -s FULL_ES3=1
-    -s OFFSCREENCANVAS_SUPPORT=1
-    -s USE_ZLIB=1
-    -s USE_LIBPNG=1
-    -s WASM=1
-  )
   set_target_properties(brogue
     PROPERTIES
     C_STANDARD 99
-    CFLAGS "${EMSETTINGS}"
-    LINK_FLAGS "-s WASM=1 --preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts"
-    )
+    C_FLAGS "-ansi -s USE_WEBGL2=1 -s FULL_ES3=1 -s OFFSCREENCANVAS_SUPPORT=1 -s USE_SDL=2 -s USE_ZLIB=1 -s USE_LIBPNG=1 -s WASM=1 -s LINKABLE=1 -s EXPORT_ALL=1 -O1"
+    LINK_FLAGS "-s LINKABLE=1 -s EXPORT_ALL=1 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=['Pointer_stringify'] --preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts --preload-file ${CMAKE_SOURCE_DIR}/keymap@keymap"
+  )
 endif()

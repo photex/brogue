@@ -338,10 +338,10 @@ extern scale_data_t scale_data;
 
 extern float scale_factor;
 extern struct SDL_Surface* charmap;
-extern struct SDL_Window* window;
-extern struct SDL_Renderer* renderer;
+extern struct SDL_Window* sdl_window;
+extern struct SDL_Renderer* sdl_renderer;
 extern char *last_clipboard_text;
-#endif
+#endif // not TCOD_BARE
 
 /* SDL & OpenGL */
 extern int oldFade;
@@ -563,4 +563,3 @@ extern int oldFade;
 }
 #endif
 #endif
-
