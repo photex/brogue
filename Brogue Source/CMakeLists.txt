@@ -71,7 +71,7 @@ if (EMSCRIPTEN)
     -s USE_WEBGL2=1 -s FULL_ES3=1
     -s OFFSCREENCANVAS_SUPPORT=1
     -s USE_ZLIB=1
-    -s USE_PNG=1
+    -s USE_LIBPNG=1
     -s WASM=1
   )
   set_target_properties(brogue

@@ -1,19 +1,20 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"editor.tabSize": 2,
-		"editor.detectIndentation": false,
-		"cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
-		"cmake.configureArgs": [
-			"-DEMSCRIPTEN=ON",
-			"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-		],
-		"files.associations": {
-			"rogue.h": "c"
-		},
-	}
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.detectIndentation": false,
+    "cmake.buildDirectory": "${workspaceRoot}/.build/emscripten",
+    "cmake.configureArgs": [
+      "-DEMSCRIPTEN=ON",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    ],
+    "files.associations": {
+      "rogue.h": "c",
+      "includeglobals.h": "c"
+    },
+  }
 }
