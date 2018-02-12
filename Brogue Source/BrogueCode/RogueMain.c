@@ -26,10 +26,36 @@
 #include <math.h>
 #include <time.h>
 
+
+
 void rogueMain() {
 	previousGameSeed = 0;
-	initializeBrogueSaveLocation();
-	mainBrogueJunction();
+
+  // clear screen and display buffer
+  short i,j,k;
+  for (i = 0; i < COLS; i++)
+  {
+    for (j = 0; j < ROWS; j++)
+    {
+      displayBuffer[i][j].character = 0;
+      displayBuffer[i][j].needsUpdate = false;
+      displayBuffer[i][j].opacity = 100;
+      for (k = 0; k < 3; k++)
+      {
+        displayBuffer[i][j].foreColorComponents[k] = 0;
+        displayBuffer[i][j].backColorComponents[k] = 0;
+      }
+      plotCharWithColor(' ', i, j, &black, &black);
+    }
+  }
+
+  rogue.gameHasEnded = false;
+  rogue.playbackFastForward = false;
+  rogue.playbackMode = false;
+
+	struct brogueMainLoopState_t state = {0};
+
+  emscripten_set_main_loop_arg(&mainBrogueJunction, (void*)&state, 0, 1);
 }
 
 void executeEvent(rogueEvent *theEvent) {
