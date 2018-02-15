@@ -888,7 +888,7 @@ void executePlaybackInput(rogueEvent *recordingInput) {
 				displayMessageArchive();
 				rogue.playbackMode = true;
 				break;
-			case VIEW_RECORDING_KEY:
+			/* case VIEW_RECORDING_KEY:
 				confirmMessages();
 				rogue.playbackMode = false;
 				if (dialogChooseFile(path, RECORDING_SUFFIX, "View recording: ")) {
@@ -915,7 +915,7 @@ void executePlaybackInput(rogueEvent *recordingInput) {
 					}
 				}
 				rogue.playbackMode = true;
-				break;
+				break; */
 			case NEW_GAME_KEY:
 				rogue.playbackMode = false;
 				if (confirm("Close recording and begin a new game?", true)) {

@@ -58,7 +58,7 @@ set(BROGUE_SOURCES
 
 add_executable(brogue ${TCOD_HEADERS} ${TCOD_SOURCES} ${BROGUE_SOURCES})
 target_compile_definitions(brogue
-  PUBLIC -DBROGUE_TCOD -DLIBTCOD_EXPORTS -DNO_OPENGL -DTCOD_EMSCRIPTEN -DTCOD_CONSOLE_SUPPORT -DTCOD_IMAGE_SUPPORT -DTCOD_OSUTIL_SUPPORT
+  PUBLIC -D__EMSCRIPTEN__ -DBROGUE_TCOD -DLIBTCOD_EXPORTS -DNO_OPENGL -DTCOD_EMSCRIPTEN -DTCOD_CONSOLE_SUPPORT -DTCOD_IMAGE_SUPPORT -DTCOD_OSUTIL_SUPPORT
 )
 target_include_directories(brogue
   PRIVATE ${CMAKE_SOURCE_DIR}/libtcod/include
@@ -68,11 +68,9 @@ target_include_directories(brogue
 )
 target_link_libraries(brogue SDL2-static SDL2main)
 
-if (EMSCRIPTEN)
-  set_target_properties(brogue
-    PROPERTIES
-    C_STANDARD 99
-    C_FLAGS "-ansi -s USE_WEBGL2=1 -s FULL_ES3=1 -s OFFSCREENCANVAS_SUPPORT=1 -s USE_SDL=2 -s USE_ZLIB=1 -s USE_LIBPNG=1 -s WASM=1 -s LINKABLE=1 -s EXPORT_ALL=1 -O1"
-    LINK_FLAGS "-s LINKABLE=1 -s EXPORT_ALL=1 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=['Pointer_stringify'] --preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts --preload-file ${CMAKE_SOURCE_DIR}/keymap@keymap"
-  )
-endif()
+set_target_properties(brogue
+  PROPERTIES
+  C_STANDARD 99
+  C_FLAGS "-ansi -s USE_WEBGL2=1 -s FULL_ES3=1 -s OFFSCREENCANVAS_SUPPORT=1 -s USE_SDL=2 -s USE_ZLIB=1 -s USE_LIBPNG=1 -s WASM=1 -s LINKABLE=1 -s EXPORT_ALL=1 -O1"
+  LINK_FLAGS "-s LINKABLE=1 -s EXPORT_ALL=1 -s WASM=1 -s EXTRA_EXPORTED_RUNTIME_METHODS=['Pointer_stringify'] --preload-file ${CMAKE_SOURCE_DIR}/fonts@/fonts --preload-file ${CMAKE_SOURCE_DIR}/keymap@keymap"
+)

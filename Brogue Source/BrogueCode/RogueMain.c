@@ -25,6 +25,7 @@
 #include "IncludeGlobals.h"
 #include <math.h>
 #include <time.h>
+#include <emscripten.h>
 
 
 
@@ -53,9 +54,7 @@ void rogueMain() {
   rogue.playbackFastForward = false;
   rogue.playbackMode = false;
 
-	struct brogueMainLoopState_t state = {0};
-
-  emscripten_set_main_loop_arg(&mainBrogueJunction, (void*)&state, 0, 1);
+  emscripten_set_main_loop(&mainBrogueJunction, 0, 1);
 }
 
 void executeEvent(rogueEvent *theEvent) {

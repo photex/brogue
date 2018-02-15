@@ -24,7 +24,8 @@
                 "BROGUE_TCOD",
                 "BROGUE_EMSCRIPTEN",
                 "TCOD_EMSCRIPTEN",
-                "NO_OPENGL"
+                "NO_OPENGL",
+                "__EMSCRIPTEN__"
             ],
             "intelliSenseMode": "msvc-x64",
             "browse": {

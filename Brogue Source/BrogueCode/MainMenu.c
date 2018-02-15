@@ -35,14 +35,35 @@
 #define MENU_FLAME_FADE_SPEED 20
 #define MENU_FLAME_UPDATE_DELAY 50
 #define MENU_FLAME_ROW_PADDING 2
+
 #define MENU_TITLE_OFFSET_X (-4)
 #define MENU_TITLE_OFFSET_Y (-1)
+#define MENU_TITLE_WIDTH 74
+#define MENU_TITLE_HEIGHT 19
 
 #define MENU_FLAME_COLOR_SOURCE_COUNT 1136
 
 #define MENU_FLAME_DENOMINATOR (100 + MENU_FLAME_RISE_SPEED + MENU_FLAME_SPREAD_SPEED)
 
-void drawMenuFlames(signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3], unsigned char mask[COLS][ROWS])
+struct titleMenuState_t
+{
+  signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3]; // red, green and blue
+  signed short colorSources[MENU_FLAME_COLOR_SOURCE_COUNT][4];   // red, green, blue, and rand, one for each color source (no more than MENU_FLAME_COLOR_SOURCE_COUNT).
+  const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)];
+  color colorStorage[COLS];
+  unsigned char mask[COLS][ROWS];
+
+  buttonState state;
+  brogueButton buttons[6];
+  rogueEvent theEvent;
+
+  //enum NGCommands buttonCommands[6] = {NG_NEW_GAME, NG_OPEN_GAME, NG_VIEW_RECORDING, NG_HIGH_SCORES, NG_QUIT};
+  enum NGCommands buttonCommands[6];
+
+  cellDisplayBuffer shadowBuf[COLS][ROWS];
+} titleMenuState;
+
+void drawMenuFlames()
 {
   short i, j, versionStringLength;
   color tempColor = {0};
@@ -64,19 +85,19 @@ void drawMenuFlames(signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3
         dchar = ' ';
       }
 
-      if (mask[i][j] == 100)
+      if (titleMenuState.mask[i][j] == 100)
       {
         plotCharWithColor(dchar, i, j, &darkGray, maskColor);
       }
       else
       {
         tempColor = black;
-        tempColor.red = flames[i][j][0] / MENU_FLAME_PRECISION_FACTOR;
-        tempColor.green = flames[i][j][1] / MENU_FLAME_PRECISION_FACTOR;
-        tempColor.blue = flames[i][j][2] / MENU_FLAME_PRECISION_FACTOR;
-        if (mask[i][j] > 0)
+        tempColor.red = titleMenuState.flames[i][j][0] / MENU_FLAME_PRECISION_FACTOR;
+        tempColor.green = titleMenuState.flames[i][j][1] / MENU_FLAME_PRECISION_FACTOR;
+        tempColor.blue = titleMenuState.flames[i][j][2] / MENU_FLAME_PRECISION_FACTOR;
+        if (titleMenuState.mask[i][j] > 0)
         {
-          applyColorAverage(&tempColor, maskColor, mask[i][j]);
+          applyColorAverage(&tempColor, maskColor, titleMenuState.mask[i][j]);
         }
         plotCharWithColor(dchar, i, j, &darkGray, &tempColor);
       }
@@ -84,11 +105,8 @@ void drawMenuFlames(signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3
   }
 }
 
-void updateMenuFlames(const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)],
-                      signed short colorSources[MENU_FLAME_COLOR_SOURCE_COUNT][4],
-                      signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3])
+void updateMenuFlames()
 {
-
   short i, j, k, l, x, y;
   signed short tempFlames[COLS][3];
   short colorSourceNumber, rand;
@@ -101,7 +119,7 @@ void updateMenuFlames(const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)]
     {
       for (k = 0; k < 3; k++)
       {
-        tempFlames[i][k] = flames[i][j][k];
+        tempFlames[i][k] = titleMenuState.flames[i][j][k];
       }
     }
 
@@ -116,7 +134,7 @@ void updateMenuFlames(const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)]
       // Itself:
       for (k = 0; k < 3; k++)
       {
-        flames[i][j][k] = 100 * flames[i][j][k] / MENU_FLAME_DENOMINATOR;
+        titleMenuState.flames[i][j][k] = 100 * titleMenuState.flames[i][j][k] / MENU_FLAME_DENOMINATOR;
       }
 
       // Left and right neighbors:
@@ -133,7 +151,7 @@ void updateMenuFlames(const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)]
         }
         for (k = 0; k < 3; k++)
         {
-          flames[i][j][k] += MENU_FLAME_SPREAD_SPEED * tempFlames[x][k] / 2 / MENU_FLAME_DENOMINATOR;
+          titleMenuState.flames[i][j][k] += MENU_FLAME_SPREAD_SPEED * tempFlames[x][k] / 2 / MENU_FLAME_DENOMINATOR;
         }
       }
 
@@ -143,32 +161,32 @@ void updateMenuFlames(const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)]
       {
         for (k = 0; k < 3; k++)
         {
-          flames[i][j][k] += MENU_FLAME_RISE_SPEED * flames[i][y][k] / MENU_FLAME_DENOMINATOR;
+          titleMenuState.flames[i][j][k] += MENU_FLAME_RISE_SPEED * titleMenuState.flames[i][y][k] / MENU_FLAME_DENOMINATOR;
         }
       }
 
       // Fade a little:
       for (k = 0; k < 3; k++)
       {
-        flames[i][j][k] = (1000 - MENU_FLAME_FADE_SPEED) * flames[i][j][k] / 1000;
+        titleMenuState.flames[i][j][k] = (1000 - MENU_FLAME_FADE_SPEED) * titleMenuState.flames[i][j][k] / 1000;
       }
 
-      if (colors[i][j])
+      if (titleMenuState.colors[i][j])
       {
         // If it's a color source tile:
 
         // First, cause the color to drift a little.
         for (k = 0; k < 4; k++)
         {
-          colorSources[colorSourceNumber][k] += rand_range(-MENU_FLAME_COLOR_DRIFT_SPEED, MENU_FLAME_COLOR_DRIFT_SPEED);
-          colorSources[colorSourceNumber][k] = clamp(colorSources[colorSourceNumber][k], 0, 1000);
+          titleMenuState.colorSources[colorSourceNumber][k] += rand_range(-MENU_FLAME_COLOR_DRIFT_SPEED, MENU_FLAME_COLOR_DRIFT_SPEED);
+          titleMenuState.colorSources[colorSourceNumber][k] = clamp(titleMenuState.colorSources[colorSourceNumber][k], 0, 1000);
         }
 
         // Then, add the color to this tile's flames.
-        rand = colors[i][j]->rand * colorSources[colorSourceNumber][0] / 1000;
-        flames[i][j][0] += (colors[i][j]->red + (colors[i][j]->redRand * colorSources[colorSourceNumber][1] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
-        flames[i][j][1] += (colors[i][j]->green + (colors[i][j]->greenRand * colorSources[colorSourceNumber][2] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
-        flames[i][j][2] += (colors[i][j]->blue + (colors[i][j]->blueRand * colorSources[colorSourceNumber][3] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
+        rand = titleMenuState.colors[i][j]->rand * titleMenuState.colorSources[colorSourceNumber][0] / 1000;
+        titleMenuState.flames[i][j][0] += (titleMenuState.colors[i][j]->red + (titleMenuState.colors[i][j]->redRand * titleMenuState.colorSources[colorSourceNumber][1] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
+        titleMenuState.flames[i][j][1] += (titleMenuState.colors[i][j]->green + (titleMenuState.colors[i][j]->greenRand * titleMenuState.colorSources[colorSourceNumber][2] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
+        titleMenuState.flames[i][j][2] += (titleMenuState.colors[i][j]->blue + (titleMenuState.colors[i][j]->blueRand * titleMenuState.colorSources[colorSourceNumber][3] / 1000) + rand) * MENU_FLAME_PRECISION_FACTOR;
 
         colorSourceNumber++;
       }
@@ -204,15 +222,7 @@ void antiAlias(unsigned char mask[COLS][ROWS])
   }
 }
 
-#define MENU_TITLE_WIDTH 74
-#define MENU_TITLE_HEIGHT 19
-
-void initializeMenuFlames(boolean includeTitle,
-                          const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)],
-                          color colorStorage[COLS],
-                          signed short colorSources[MENU_FLAME_COLOR_SOURCE_COUNT][4],
-                          signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3],
-                          unsigned char mask[COLS][ROWS])
+void initializeMenuFlames(boolean includeTitle)
 {
   short i, j, k, colorSourceCount;
   const char title[MENU_TITLE_HEIGHT][MENU_TITLE_WIDTH + 1] = {
@@ -241,7 +251,7 @@ void initializeMenuFlames(boolean includeTitle,
   {
     for (j = 0; j < ROWS; j++)
     {
-      mask[i][j] = 0;
+      titleMenuState.mask[i][j] = 0;
     }
   }
 
@@ -249,10 +259,10 @@ void initializeMenuFlames(boolean includeTitle,
   {
     for (j = 0; j < (ROWS + MENU_FLAME_ROW_PADDING); j++)
     {
-      colors[i][j] = NULL;
+      titleMenuState.colors[i][j] = NULL;
       for (k = 0; k < 3; k++)
       {
-        flames[i][j][k] = 0;
+        titleMenuState.flames[i][j][k] = 0;
       }
     }
   }
@@ -262,7 +272,7 @@ void initializeMenuFlames(boolean includeTitle,
   {
     for (k = 0; k < 4; k++)
     {
-      colorSources[i][k] = rand_range(0, 1000);
+      titleMenuState.colorSources[i][k] = rand_range(0, 1000);
     }
   }
 
@@ -270,10 +280,10 @@ void initializeMenuFlames(boolean includeTitle,
   colorSourceCount = 0;
   for (i = 0; i < COLS; i++)
   {
-    colorStorage[colorSourceCount] = flameSourceColor;
-    applyColorAverage(&(colorStorage[colorSourceCount]), &flameSourceColorSecondary, 100 - (smoothHiliteGradient(i, COLS - 1) + 25));
+    titleMenuState.colorStorage[colorSourceCount] = flameSourceColor;
+    applyColorAverage(&(titleMenuState.colorStorage[colorSourceCount]), &flameSourceColorSecondary, 100 - (smoothHiliteGradient(i, COLS - 1) + 25));
 
-    colors[i][(ROWS + MENU_FLAME_ROW_PADDING) - 1] = &(colorStorage[colorSourceCount]);
+    titleMenuState.colors[i][(ROWS + MENU_FLAME_ROW_PADDING) - 1] = &(titleMenuState.colorStorage[colorSourceCount]);
     colorSourceCount++;
   }
 
@@ -286,15 +296,15 @@ void initializeMenuFlames(boolean includeTitle,
       {
         if (title[j][i] != ' ')
         {
-          colors[(COLS - MENU_TITLE_WIDTH) / 2 + i + MENU_TITLE_OFFSET_X][(ROWS - MENU_TITLE_HEIGHT) / 2 + j + MENU_TITLE_OFFSET_Y] = &flameTitleColor;
+          titleMenuState.colors[(COLS - MENU_TITLE_WIDTH) / 2 + i + MENU_TITLE_OFFSET_X][(ROWS - MENU_TITLE_HEIGHT) / 2 + j + MENU_TITLE_OFFSET_Y] = &flameTitleColor;
           colorSourceCount++;
-          mask[(COLS - MENU_TITLE_WIDTH) / 2 + i + MENU_TITLE_OFFSET_X][(ROWS - MENU_TITLE_HEIGHT) / 2 + j + MENU_TITLE_OFFSET_Y] = 100;
+          titleMenuState.mask[(COLS - MENU_TITLE_WIDTH) / 2 + i + MENU_TITLE_OFFSET_X][(ROWS - MENU_TITLE_HEIGHT) / 2 + j + MENU_TITLE_OFFSET_Y] = 100;
         }
       }
     }
 
     // Anti-alias the mask.
-    antiAlias(mask);
+    antiAlias(titleMenuState.mask);
   }
 
   brogueAssert(colorSourceCount <= MENU_FLAME_COLOR_SOURCE_COUNT);
@@ -302,33 +312,20 @@ void initializeMenuFlames(boolean includeTitle,
   // Simulate the background flames for a while
   for (i = 0; i < 100; i++)
   {
-    updateMenuFlames(colors, colorSources, flames);
+    updateMenuFlames();
   }
 }
 
-void titleMenu()
+void initializeTitleMenuState(void* _unused)
 {
-  signed short flames[COLS][(ROWS + MENU_FLAME_ROW_PADDING)][3]; // red, green and blue
-  signed short colorSources[MENU_FLAME_COLOR_SOURCE_COUNT][4];   // red, green, blue, and rand, one for each color source (no more than MENU_FLAME_COLOR_SOURCE_COUNT).
-  const color *colors[COLS][(ROWS + MENU_FLAME_ROW_PADDING)];
-  color colorStorage[COLS];
-  unsigned char mask[COLS][ROWS];
-  boolean controlKeyWasDown = false;
-
-  short i, b, x, y, button;
-  buttonState state;
-  brogueButton buttons[6];
+  short i, b, x, y;
   char whiteColorEscape[10] = "";
   char goldColorEscape[10] = "";
   char newGameText[100] = "";
-  rogueEvent theEvent;
-  //enum NGCommands buttonCommands[6] = {NG_NEW_GAME, NG_OPEN_GAME, NG_VIEW_RECORDING, NG_HIGH_SCORES, NG_QUIT};
-  enum NGCommands buttonCommands[6] = {NG_NEW_GAME};
 
-  cellDisplayBuffer shadowBuf[COLS][ROWS];
+  titleMenuState.buttonCommands[0] = NG_NEW_GAME;
 
   // Initialize the RNG so the flames aren't always the same.
-
   seedRandomGenerator(0);
 
   // Empty nextGamePath and nextGameSeed so that the buttons don't try to load an old game path or seed.
@@ -340,12 +337,11 @@ void titleMenu()
   encodeMessageColor(goldColorEscape, 0, KEYBOARD_LABELS ? &itemMessageColor : &white);
   sprintf(newGameText, "      %sN%sew Game      ", goldColorEscape, whiteColorEscape);
   b = 0;
-  button = -1;
 
-  initializeButton(&(buttons[b]));
-  strcpy(buttons[b].text, newGameText);
-  buttons[b].hotkey[0] = 'n';
-  buttons[b].hotkey[1] = 'N';
+  initializeButton(&(titleMenuState.buttons[b]));
+  strcpy(titleMenuState.buttons[b].text, newGameText);
+  titleMenuState.buttons[b].hotkey[0] = 'n';
+  titleMenuState.buttons[b].hotkey[1] = 'N';
   b++;
 
   x = COLS - 1 - 20 - 2;
@@ -353,49 +349,55 @@ void titleMenu()
   for (i = b - 1; i >= 0; i--)
   {
     y -= 2;
-    buttons[i].x = x;
-    buttons[i].y = y;
-    buttons[i].buttonColor = titleButtonColor;
-    buttons[i].flags |= B_WIDE_CLICK_AREA;
+    titleMenuState.buttons[i].x = x;
+    titleMenuState.buttons[i].y = y;
+    titleMenuState.buttons[i].buttonColor = titleButtonColor;
+    titleMenuState.buttons[i].flags |= B_WIDE_CLICK_AREA;
   }
 
   blackOutScreen();
-  clearDisplayBuffer(shadowBuf);
-  initializeButtonState(&state, buttons, b, x, y, 20, b * 2 - 1);
-  rectangularShading(x, y, 20, b * 2 - 1, &black, INTERFACE_OPACITY, shadowBuf);
-  drawButtonsInState(&state);
+  clearDisplayBuffer(titleMenuState.shadowBuf);
+  initializeButtonState(&titleMenuState.state, titleMenuState.buttons, b, x, y, 20, b * 2 - 1);
+  rectangularShading(x, y, 20, b * 2 - 1, &black, INTERFACE_OPACITY, titleMenuState.shadowBuf);
+  drawButtonsInState(&titleMenuState.state);
 
-  initializeMenuFlames(true, colors, colorStorage, colorSources, flames, mask);
+  initializeMenuFlames(true);
   rogue.creaturesWillFlashThisTurn = false; // total unconscionable hack
+}
 
-  do
+void titleMenu(void)
+{
+  short button = -1;
+
+  // Update the display.
+  updateMenuFlames();
+  drawMenuFlames();
+  overlayDisplayBuffer(titleMenuState.shadowBuf, NULL);
+  overlayDisplayBuffer(titleMenuState.state.dbuf, NULL);
+
+  // Pause briefly.
+  if (pauseBrogue(MENU_FLAME_UPDATE_DELAY))
   {
-    // Update the display.
-    updateMenuFlames(colors, colorSources, flames);
-    drawMenuFlames(flames, mask);
-    overlayDisplayBuffer(shadowBuf, NULL);
-    overlayDisplayBuffer(state.dbuf, NULL);
+    // There was input during the pause! Get the input.
+    nextBrogueEvent(&titleMenuState.theEvent, true, false, true);
 
-    // Pause briefly.
-    if (pauseBrogue(MENU_FLAME_UPDATE_DELAY))
+    // Process the input.
+    button = processButtonInput(&titleMenuState.state, NULL, &titleMenuState.theEvent);
+    if (button != -1)
     {
-      // There was input during the pause! Get the input.
-      nextBrogueEvent(&theEvent, true, false, true);
-
-      // Process the input.
-      button = processButtonInput(&state, NULL, &theEvent);
+      rogue.nextGame = titleMenuState.buttonCommands[button];
     }
+  }
 
-    // Revert the display.
-    overlayDisplayBuffer(state.rbuf, NULL);
+  // Revert the display.
+  overlayDisplayBuffer(titleMenuState.state.rbuf, NULL);
 
-  } while (button == -1 && rogue.nextGame == NG_NOTHING);
+  drawMenuFlames();
 
-  drawMenuFlames(flames, mask);
-
-  if (button != -1)
+  if (rogue.nextGame != NG_NOTHING)
   {
-    rogue.nextGame = buttonCommands[button];
+    emscripten_cancel_main_loop();
+    emscripten_set_main_loop(&mainBrogueJunction, 0, 0);
   }
 }
 
@@ -724,15 +726,15 @@ the first %i depths will, of course, make the game significantly easier.",
 // accompanying path, and it's a command that should take a path, then pop up a dialog to have
 // the player specify a path. If there is no command (i.e. if rogue.nextGame contains NG_NOTHING),
 // then we'll display the title screen so the player can choose.
-void mainBrogueJunction()
+void mainBrogueJunction(void)
 {
-  short i, j, k;
-
   switch (rogue.nextGame)
   {
   case NG_NOTHING:
+    emscripten_cancel_main_loop();
+    emscripten_push_uncounted_main_loop_blocker(initializeTitleMenuState, NULL);
     // Run the main menu to get a decision out of the player.
-    titleMenu();
+    emscripten_set_main_loop(titleMenu, 0, 1);
     break;
 
   case NG_NEW_GAME:

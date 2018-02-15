@@ -2962,7 +2962,7 @@ void executeKeystroke(signed long keystroke, boolean controlKey, boolean shiftKe
 	case DISCOVERIES_KEY:
 		printDiscoveriesScreen();
 		break;
-	case VIEW_RECORDING_KEY:
+	/* case VIEW_RECORDING_KEY:
 		if (rogue.playbackMode)
 		{
 			return;
@@ -2981,8 +2981,8 @@ void executeKeystroke(signed long keystroke, boolean controlKey, boolean shiftKe
 				message("File not found.", false);
 			}
 		}
-		break;
-	case LOAD_SAVED_GAME_KEY:
+		break; */
+	/* case LOAD_SAVED_GAME_KEY:
 		if (rogue.playbackMode)
 		{
 			return;
@@ -3011,7 +3011,7 @@ void executeKeystroke(signed long keystroke, boolean controlKey, boolean shiftKe
 		{
 			saveGame();
 		}
-		break;
+		break; */
 	case NEW_GAME_KEY:
 		if (rogue.playerTurnNumber < 50 || confirm("End this game and begin a new game?", false))
 		{
